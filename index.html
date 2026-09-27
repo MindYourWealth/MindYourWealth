@@ -19,6 +19,10 @@
   #chips { max-width:960px; margin:16px auto 0; padding:0 20px; display:flex; flex-wrap:wrap; gap:8px; }
   #chips button { border:1px solid var(--line); background:#fff; color:var(--ink); border-radius:20px; padding:7px 16px; font-size:.85rem; cursor:pointer; }
   #chips button.active { background:#1f1b16; color:#fff; border-color:#1f1b16; }
+  #prime-banner { max-width:960px; margin:18px auto 0; padding:0 20px; }
+  #prime-banner div { background:linear-gradient(135deg,#1f1b16,#4a2c10); color:#fff; border-radius:12px; padding:14px 18px; text-align:center; }
+  #prime-banner strong { display:block; font-size:1.05rem; letter-spacing:.4px; }
+  #prime-banner span { font-size:.85rem; color:#e8d9bd; }
   #grid { max-width:960px; margin:18px auto 40px; padding:0 20px; display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:16px; }
   .card { background:var(--card); border:1px solid var(--line); border-radius:12px; overflow:hidden; display:flex; flex-direction:column; scroll-margin-top:20px; }
   .card img { width:100%; height:180px; object-fit:contain; background:#fff; padding:10px; }
@@ -46,6 +50,10 @@
   <span id="updated">deals loading…</span>
 </header>
 
+<div id="prime-banner" hidden>
+  <div><strong id="prime-title"></strong><span id="prime-sub"></span></div>
+</div>
+
 <div class="disclosure">
   <div><strong>QUICK DISCLOSURE</strong>As an Amazon Associate I earn from qualifying purchases made through links on this page — at no extra cost to you.</div>
 </div>
@@ -62,6 +70,20 @@
 <script>
 (function(){
   "use strict";
+  // Prime Big Deal Days banner (Oct 6-7, 2026) — date-aware.
+  (function primeBanner(){
+    var now = new Date();
+    var d = now.getFullYear()*10000 + (now.getMonth()+1)*100 + now.getDate();
+    var t = "", s = "";
+    if (d < 20261006){ t = "Prime Big Deal Days — Oct 6–7"; s = "Early deals are dropping now. Prices re-verified daily through the event."; }
+    else if (d <= 20261007){ t = "Prime Big Deal Days are LIVE"; s = "Deal drops at 3am, 11am, 4pm ET. Prices move fast — check current price at checkout."; }
+    else if (d <= 20261009){ t = "Prime deals that survived"; s = "Straggler deals still live — grab them before they're gone."; }
+    else return;
+    document.getElementById("prime-title").textContent = t;
+    document.getElementById("prime-sub").textContent = s;
+    document.getElementById("prime-banner").hidden = false;
+  })();
+
   var JSON_URL = "./deals.json";
   var CACHE_KEY = "mwy-deals-cache-v1";
   var CACHE_TTL = 6 * 3600 * 1000; // 6 hours
