@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Today's Deals — Mind Your Wealth</title>
+<meta name="description" content="Hand-picked Amazon deals, refreshed daily. As an Amazon Associate I earn from qualifying purchases.">
+<style>
+  :root { --bg:#faf7f2; --card:#ffffff; --ink:#1f1b16; --muted:#6f655a; --accent:#b3541e; --accent-dark:#93400f; --line:#e8e0d4; --badge:#1d7a3a; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; background:var(--bg); color:var(--ink); line-height:1.5; }
+  header { background:#1f1b16; color:#fff; padding:28px 20px 22px; text-align:center; }
+  header h1 { font-size:1.7rem; letter-spacing:.5px; }
+  header p { color:#d8cfc2; margin-top:6px; font-size:.95rem; }
+  #updated { display:inline-block; margin-top:10px; font-size:.8rem; background:#33302a; color:#e8dfcf; padding:4px 12px; border-radius:20px; }
+  .disclosure { max-width:960px; margin:18px auto 0; padding:0 20px; }
+  .disclosure div { background:#fff8e7; border:1px solid #ecd9a8; border-radius:10px; padding:12px 16px; font-size:.85rem; color:#5c4d1f; }
+  .disclosure strong { display:block; margin-bottom:2px; letter-spacing:.4px; font-size:.78rem; }
+  #chips { max-width:960px; margin:16px auto 0; padding:0 20px; display:flex; flex-wrap:wrap; gap:8px; }
+  #chips button { border:1px solid var(--line); background:#fff; color:var(--ink); border-radius:20px; padding:7px 16px; font-size:.85rem; cursor:pointer; }
+  #chips button.active { background:#1f1b16; color:#fff; border-color:#1f1b16; }
+  #grid { max-width:960px; margin:18px auto 40px; padding:0 20px; display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:16px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:12px; overflow:hidden; display:flex; flex-direction:column; scroll-margin-top:20px; }
+  .card img { width:100%; height:180px; object-fit:contain; background:#fff; padding:10px; }
+  .card .noimg { height:180px; display:flex; align-items:center; justify-content:center; background:#f1ece3; color:var(--muted); font-size:.85rem; }
+  .card .body { padding:14px 14px 16px; display:flex; flex-direction:column; gap:8px; flex:1; }
+  .card h3 { font-size:.92rem; font-weight:600; line-height:1.35; }
+  .price-row { display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; }
+  .price { font-size:1.15rem; font-weight:700; color:var(--accent-dark); }
+  .list { font-size:.85rem; color:var(--muted); text-decoration:line-through; }
+  .save-badge { font-size:.72rem; font-weight:700; background:#e5f4e9; color:var(--badge); padding:2px 8px; border-radius:12px; }
+  .deal-note { font-size:.82rem; color:var(--muted); }
+  .deal-note code { background:#f1ece3; padding:1px 7px; border-radius:6px; font-weight:700; color:var(--ink); }
+  .cta { margin-top:auto; display:block; text-align:center; background:var(--accent); color:#fff; text-decoration:none; font-weight:700; padding:11px; border-radius:9px; font-size:.92rem; }
+  .cta:hover { background:var(--accent-dark); }
+  #status { max-width:960px; margin:30px auto; padding:0 20px; text-align:center; color:var(--muted); }
+  .spinner { width:34px; height:34px; border:4px solid var(--line); border-top-color:var(--accent); border-radius:50%; margin:0 auto 12px; animation:spin 1s linear infinite; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  footer { max-width:960px; margin:0 auto 40px; padding:0 20px; font-size:.78rem; color:var(--muted); text-align:center; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Today's Deals</h1>
+  <p>Hand-picked Amazon finds, refreshed every morning.</p>
+  <span id="updated">deals loading…</span>
+</header>
+
+<div class="disclosure">
+  <div><strong>QUICK DISCLOSURE</strong>As an Amazon Associate I earn from qualifying purchases made through links on this page — at no extra cost to you.</div>
+</div>
+
+<div id="chips" role="tablist" aria-label="Deal categories"></div>
+<div id="status"><div class="spinner"></div>Loading today's deals…</div>
+<div id="grid" hidden></div>
+
+<footer>
+  Prices and availability are accurate as of the time of posting and are subject to change.
+  As an Amazon Associate I earn from qualifying purchases. Product images are for illustration.
+</footer>
+
+<script>
+(function(){
+  "use strict";
+  var JSON_URL = "./deals.json";
+  var CACHE_KEY = "mwy-deals-cache-v1";
+  var CACHE_TTL = 6 * 3600 * 1000; // 6 hours
+  var MAX_CARDS = 30;
+
+  var CATS = [
+    { id:"all",     label:"All Deals",     kw:[] },
+    { id:"kitchen", label:"Kitchen",       kw:["kitchen","cook","baking","bake","coffee","air fryer","knife","pan ","pot ","mug","blender","grill"] },
+    { id:"smart",   label:"Smart Home",    kw:["smart","alexa","echo","led","lamp","bulb","plug","vacuum","robot","security","doorbell","thermostat"] },
+    { id:"selfcare",label:"Self-Care",     kw:["skincare","serum","lotion","cream","candle","bath","spa","hair","beauty","vitamin","supplement"] },
+    { id:"holiday", label:"Holiday Decor", kw:["christmas","halloween","decor","ornament","wreath","lights","garland","pumpkin","skeleton"] },
+    { id:"more",    label:"More Finds",    kw:null }
+  ];
+
+  function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+  function num(s){ if(!s) return null; var n = parseFloat(String(s).replace(/[^0-9.]/g,"")); return isNaN(n)?null:n; }
+  function catOf(p){
+    var n = (p.name||"").toLowerCase();
+    for (var i=1;i<CATS.length-1;i++){
+      var kws = CATS[i].kw;
+      for (var j=0;j<kws.length;j++) if (n.indexOf(kws[j])>-1) return CATS[i].id;
+    }
+    return "more";
+  }
+
+  function loadDeals(){
+    try {
+      var raw = localStorage.getItem(CACHE_KEY);
+      if (raw){ var c = JSON.parse(raw); if (c && c.data && (Date.now()-c.ts) < CACHE_TTL) return Promise.resolve(c.data); }
+    } catch(e){}
+    return fetch(JSON_URL,{cache:"no-store"}).then(function(r){
+      if(!r.ok) throw new Error("HTTP "+r.status);
+      return r.json();
+    }).then(function(data){
+      try { localStorage.setItem(CACHE_KEY, JSON.stringify({ts:Date.now(), data:data})); } catch(e){}
+      return data;
+    });
+  }
+
+  function cardHTML(p){
+    var price = num(p.price), list = num(p.list_price), badge = "";
+    if (price!=null && list!=null && list>price){
+      badge = '<span class="save-badge">Save '+Math.round((1-price/list)*100)+'%</span>';
+    }
+    var priceRow = p.price
+      ? '<div class="price-row"><span class="price">'+esc(p.price)+'</span>'
+        + (p.list_price?'<span class="list">'+esc(p.list_price)+'</span>':"") + badge + '</div>'
+      : '<div class="price-row"><span class="price" style="font-size:.95rem">check current price</span></div>';
+    var note = "";
+    if (p.code) note = '<div class="deal-note">Use code <code>'+esc(p.code)+'</code> at checkout</div>';
+    else if (p.deal_note) note = '<div class="deal-note">'+esc(p.deal_note)+'</div>';
+    var img = p.image
+      ? '<img src="./'+esc(p.image)+'" alt="'+esc(p.name||"deal")+'" loading="lazy" onerror="this.outerHTML=\'<div class=noimg>Photo coming soon</div>\'">'
+      : '<div class="noimg">Photo coming soon</div>';
+    var url = p.url || ("https://www.amazon.com/dp/"+encodeURIComponent(p.asin));
+    return '<article class="card" id="'+esc(p.asin)+'">'
+      + img
+      + '<div class="body"><h3>'+esc(p.name||"Amazon find")+'</h3>'
+      + priceRow + note
+      + '<a class="cta" href="'+esc(url)+'" target="_blank" rel="nofollow sponsored noopener">View Deal</a>'
+      + '</div></article>';
+  }
+
+  var all = [];
+  function render(cat){
+    var grid = document.getElementById("grid");
+    var list = all.filter(function(p){ return cat==="all" || p._cat===cat; });
+    grid.innerHTML = list.map(cardHTML).join("");
+    grid.hidden = false;
+    document.getElementById("status").style.display = "none";
+    if (location.hash){
+      var el = document.getElementById(location.hash.slice(1));
+      if (el) setTimeout(function(){ el.scrollIntoView({block:"center"}); }, 60);
+    }
+  }
+
+  function renderChips(){
+    var box = document.getElementById("chips");
+    box.innerHTML = "";
+    CATS.forEach(function(c){
+      var b = document.createElement("button");
+      b.textContent = c.label;
+      b.setAttribute("role","tab");
+      if (c.id==="all") b.classList.add("active");
+      b.onclick = function(){
+        box.querySelectorAll("button").forEach(function(x){x.classList.remove("active");});
+        b.classList.add("active");
+        render(c.id);
+      };
+      box.appendChild(b);
+    });
+  }
+
+  loadDeals().then(function(data){
+    var products = (data && data.products) || [];
+    var pinned = products.filter(function(p){return p.pinned;});
+    var rest = products.filter(function(p){return !p.pinned;}).reverse(); // newest first
+    all = pinned.concat(rest).slice(0, MAX_CARDS);
+    all.forEach(function(p){ p._cat = catOf(p); });
+    if (data && data.updated) document.getElementById("updated").textContent = "deals updated " + data.updated;
+    else document.getElementById("updated").textContent = "deals updated recently";
+    renderChips();
+    render("all");
+  }).catch(function(){
+    document.getElementById("status").innerHTML = "Couldn't load today's deals — please check back in a bit.";
+    document.getElementById("updated").textContent = "deals unavailable";
+  });
+})();
+</script>
+</body>
+</html>
