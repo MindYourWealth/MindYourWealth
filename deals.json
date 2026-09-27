@@ -3091,10 +3091,62 @@
       "code": null,
       "deal_note": null,
       "image": "images/B0DRBLTN46.png",
+      "pinned": true,
+      "pin_url": "https://www.pinterest.com/pin/1124422232001841409/",
+      "date_added": "2026-09-27",
+      "url": "https://www.amazon.com/dp/B0DRBLTN46?tag=mindyourwealt-20"
+    },
+    {
+      "asin": "B0H4FD8S1X",
+      "name": "Halloween Black Cat Yard Decorations 6-Pack",
+      "price": "$12.79",
+      "list_price": "$22.99",
+      "code": null,
+      "deal_note": null,
+      "image": "images/B0H4FD8S1X.jpg",
       "pinned": false,
       "pin_url": null,
       "date_added": "2026-09-27",
-      "url": "https://www.amazon.com/dp/B0DRBLTN46?tag=mindyourwealt-20"
+      "url": "https://www.amazon.com/dp/B0H4FD8S1X?tag=mindyourwealt-20"
+    },
+    {
+      "asin": "B0GKCLMJXC",
+      "name": "JandCase 10-Color Dimmable Photo Frame Night Light",
+      "price": "$6.99",
+      "list_price": "$21.99",
+      "code": "51PZX8RL",
+      "deal_note": "w/ code 51PZX8RL",
+      "image": "images/B0GKCLMJXC.jpg",
+      "pinned": false,
+      "pin_url": null,
+      "date_added": "2026-09-27",
+      "url": "https://www.amazon.com/dp/B0GKCLMJXC?tag=mindyourwealt-20"
+    },
+    {
+      "asin": "B0C5J8MVDD",
+      "name": "300-Pc First Aid Kit (Red)",
+      "price": "$14.99",
+      "list_price": "$24.99",
+      "code": null,
+      "deal_note": null,
+      "image": "images/B0C5J8MVDD.jpg",
+      "pinned": false,
+      "pin_url": null,
+      "date_added": "2026-09-27",
+      "url": "https://www.amazon.com/dp/B0C5J8MVDD?tag=mindyourwealt-20"
+    },
+    {
+      "asin": "B086L5KGNZ",
+      "name": "Exclusivo Mezcla Plush Fuzzy Fleece Throw Blanket 50x70 (Pink)",
+      "price": "$9",
+      "list_price": "$10",
+      "code": null,
+      "deal_note": null,
+      "image": "images/B086L5KGNZ.jpg",
+      "pinned": false,
+      "pin_url": null,
+      "date_added": "2026-09-27",
+      "url": "https://www.amazon.com/dp/B086L5KGNZ?tag=mindyourwealt-20"
     }
   ]
 }
